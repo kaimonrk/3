@@ -1,32 +1,27 @@
 from telegram import Update
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-def start(update: Update, context):
-    update.message.reply_text("🔒 Security Helper Bot\nCommands:\n/start - Show help\n/scan <IP> - Check host")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🔒 Security Helper Bot\nCommands:\n/start - Show help\n/scan <IP> - Check host")
 
-def scan(update: Update, context):
+async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
     target = context.args[0] if context.args else None
     if not target:
-        update.message.reply_text("⚠ Usage: /scan <IP>")
+        await update.message.reply_text("⚠ Usage: /scan <IP>")
         return
-    update.message.reply_text(f"🛡️ Scanning {target} (legal use only)...")
+    await update.message.reply_text(f"🛡️ Scanning {target} (legal use only)...")
     import os
     result = os.popen(f"ping -c 4 {target}").read()
-    update.message.reply_text(f"📡 Ping Results:\n{result}")
+    await update.message.reply_text(f"📡 Ping Results:\n{result}")
 
-updater = Updater("8029133503:AAFvsd5OKAmmwQlEr0lIdFsD8T4X0STPYG4")  # Replace with your bot token
-updater.dispatcher.add_handler(CommandHandler("start", start))
-updater.dispatcher.add_handler(CommandHandler("scan", scan))
-updater.start_polling()
-print("Bot is running...")
+def main():
+    application = Application.builder().token("YOUR_BOT_TOKEN").build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("scan", scan))
+    
+    print("Bot is running...")
+    application.run_polling()
 
-def nmap_scan(update: Update, context):
-    target = context.args[0] if context.args else None
-    if not target:
-        update.message.reply_text("⚠ Usage: /nmap <IP>")
-        return
-    update.message.reply_text(f"🔍 Running nmap on {target}...")
-    result = os.popen(f"nmap -sV {target}").read()
-    update.message.reply_text(f"📡 Nmap Results:\n{result}")
-
-updater.dispatcher.add_handler(CommandHandler("nmap", nmap_scan))
+if __name__ == "__main__":
+    main()
